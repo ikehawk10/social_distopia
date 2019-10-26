@@ -1,8 +1,20 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const express = require('express');
+const app = require('express')();
 
-const app = express();
+const firebase = require('firebase');
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC537rBkgKOFlEnyY-hZa8EHKNdkVuSHbw",
+  authDomain: "social-distopia.firebaseapp.com",
+  databaseURL: "https://social-distopia.firebaseio.com",
+  projectId: "social-distopia",
+  storageBucket: "social-distopia.appspot.com",
+  messagingSenderId: "262282507498",
+  appId: "1:262282507498:web:62c73aa8c9ca2b5ae75393"
+};
+
+firebase.initializeApp(firebaseConfig);
 
 admin.initializeApp();
 
@@ -47,6 +59,25 @@ app.post('/scream', (req, res) => {
       console.error(err);
     })
 });
+
+app.post('/signup', (req, res) => {
+  const newUser = {
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    handle: req.body.handle 
+  }
+
+  firebase.auth()
+    .createUserWithEmailAndPassword(newUser.email, newUser.password)
+    .then(data => {
+      return res.status(201).json({ message: `user ${data.user.uid} signed up successfully!`})
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({ error: err.code });
+    })
+})
   
 
 exports.api = functions.https.onRequest(app);
